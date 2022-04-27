@@ -1,0 +1,40 @@
+{{define "body"}}
+<section class="section">
+    <h1 class="title">Hello, {{ .Name }}</h1>
+    <div class="columns">
+        <div class="column">
+    <form method="POST">
+        <div class="field">
+        <label class="label">Height In Inches</label>
+        <div class="control">
+            <input class="input" type="text" name="height" placeholder="Height (in.)" {{ if .FormValues.Height }} value="{{ .FormValues.Height }}" {{ end }}>
+        </div>
+        </div>
+        
+        <div class="field">
+        <label class="label">Waist In Inches</label>
+        <div class="control">
+            <input class="input" type="text" name="waist" placeholder="Waist (in.)" {{ if .FormValues.Waist }} value="{{ .FormValues.Waist }}" {{ end }}>
+        </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Neck In Inches</label>
+            <div class="control">
+              <input class="input" type="text" name="neck" placeholder="Neck (in.)" {{ if .FormValues.Neck }} value="{{ .FormValues.Neck }}" {{ end }}>
+            </div>
+        </div>
+
+          
+        <div class="control">
+            <button class="button is-link">Submit</button>
+        </div>
+    </form>
+    </div>
+    <div class="column">
+    <p>Body Fat Percentage: {{ .BodyFat }}</p>
+    <p>BMI: {{ .BMI }}</p>
+    </div>
+    </div>
+</section>
+{{end}}
