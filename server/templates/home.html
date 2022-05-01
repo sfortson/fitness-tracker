@@ -1,9 +1,24 @@
 {{define "body"}}
 <section class="section">
-    <h1 class="title">Hello, {{ .Name }}</h1>
+    <h1 class="title is-1">Hello, {{ .Name }}</h1>
     <div class="columns">
-        <div class="column">
+        <div class="column is-one-third">
+            <h2 class="title is-3">Enter Information</h2>
     <form method="POST">
+        <div class="field">
+            <label class="label">Age</label>
+            <div class="control">
+                <input class="input" type="text" name="age" placeholder="Age" {{ if .FormValues.Age }} value="{{ .FormValues.Age }}" {{ end }}>
+            </div>
+        </div>
+        
+        <div class="field">
+            <label class="label">Weight In Pounds</label>
+            <div class="control">
+                <input class="input" type="text" name="weight" placeholder="Weight (lbs.)" {{ if .FormValues.Weight }} value="{{ .FormValues.Weight }}" {{ end }}>
+            </div>
+        </div>
+
         <div class="field">
         <label class="label">Height In Inches</label>
         <div class="control">
@@ -25,16 +40,35 @@
             </div>
         </div>
 
-          
         <div class="control">
             <button class="button is-link">Submit</button>
         </div>
     </form>
     </div>
-    <div class="column">
-    <p>Body Fat Percentage: {{ .BodyFat }}</p>
-    <p>BMI: {{ .BMI }}</p>
+    <div class="column is-offset-2">
+        <h2 class="title is-3">Results</h2>
+        <table class="table">
+            <thead></thead>
+            <tbody>
+                <tr>
+                    <td>Body Fat (U.S. Navy Method)</td>
+                    <td>{{ .BodyFat }}</td>
+                </tr>
+                <tr>
+                    <td>BMI</td>
+                    <td>{{ .BMI }}</td>
+                </tr>
+                <tr>
+                    <td>Body Fat Description</td>
+                    <td>{{ .Description }}</td>
+                </tr>
+                <tr>
+                    <td>Health Risk</td>
+                    <td>{{ .HealthRisk }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-    </div>
+</div>
 </section>
 {{end}}

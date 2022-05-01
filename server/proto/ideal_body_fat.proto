@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/sfortson/fitness-tracker";
+
+message Bump {
+    message AgeRange {
+        optional int64 min = 1;
+        optional int64 max = 2;
+    }
+
+    message BodyFatRange {
+        optional string description = 1;
+        optional string health_risk = 2;
+        optional float min = 3;
+        optional float max = 4;
+    }
+
+    AgeRange age = 2;
+    repeated BodyFatRange body_fat_percentage = 3;
+}
+
+message Bumps {
+    repeated Bump bump = 1;
+}
