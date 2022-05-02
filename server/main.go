@@ -5,61 +5,53 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/sfortson/fitness-tracker/server/calculator"
+	"github.com/felixge/httpsnoop"
+	"github.com/gorilla/mux"
+	"github.com/sfortson/fitness-tracker/server/pages"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type HomePage struct {
-	Name        string
-	BodyFat     float64
-	BMI         float64
-	FormValues  calculator.BodyFatCalculator
-	Description string
-	HealthRisk  string
-}
-
-func parseFloat(s string) float64 {
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return 0.0
-	}
-	return f
-}
-
-func parseInt(s string) int {
-	i, err := strconv.ParseInt(s, 10, 32)
-	if err != nil {
-		return 0
-	}
-	return int(i)
-}
-
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(r.Method)
-	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
+func registration(w http.ResponseWriter, r *http.Request) {
+	t, err := template.ParseFiles("server/templates/registration.html", "server/templates/base.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 	tmpl := template.Must(t, err)
-
 	if r.Method != http.MethodPost {
-		hp := HomePage{Name: "Sam", BodyFat: 0.0, BMI: 0.0}
-		tmpl.ExecuteTemplate(w, "base", hp)
+		tmpl.ExecuteTemplate(w, "base", nil)
 		return
 	}
 
-	bf := calculator.BodyFatCalculator{Neck: parseFloat(r.FormValue("neck")), Weight: parseFloat(r.FormValue("weight")), Waist: parseFloat(r.FormValue("waist")), Height: parseFloat(r.FormValue("height")), Age: parseInt(r.FormValue("age"))}
-	percentage := bf.Calculate()
-	bmi := bf.CalculateBMI()
-	description, healthrisk := bf.ReadIdeals(float32(percentage))
+	hashed, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	hp := HomePage{Name: "Sam", BodyFat: percentage, BMI: bmi, FormValues: bf, Description: description, HealthRisk: healthrisk}
+	fmt.Println(hashed)
 
-	tmpl.ExecuteTemplate(w, "base", hp)
+	tmpl.ExecuteTemplate(w, "base", nil)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Do stuff here
+		m := httpsnoop.CaptureMetrics(next, w, r)
+		log.Printf("%v %v %v %v", r.Method, r.URL, r.Proto, m.Code)
+		// Call the next handler, which can be another middleware in the chain, or the final handler.
+		next.ServeHTTP(w, r)
+	})
 }
 
 func main() {
-	http.HandleFunc("/", homePage)
-	http.ListenAndServe(":8000", nil)
+	r := mux.NewRouter()
+	r.HandleFunc("/", pages.HomePage).Methods("GET", "POST")
+	r.HandleFunc("/registration", registration)
+	r.Use(loggingMiddleware)
+
+	log.Println("Listening...")
+	err := http.ListenAndServe(":8000", r)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

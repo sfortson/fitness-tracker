@@ -10,6 +10,7 @@ type User struct {
 	BodyFatMeasurements []BodyFat
 	FirstName           string
 	LastName            string
+	Email               string
 }
 
 type BodyFat struct {
