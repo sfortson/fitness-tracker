@@ -8,9 +8,8 @@ import (
 type User struct {
 	gorm.Model
 	BodyFatMeasurements []BodyFat
-	FirstName           string
-	LastName            string
 	Email               string
+	Username			string
 }
 
 type BodyFat struct {

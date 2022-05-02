@@ -43,6 +43,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		hp := homepage{Name: "Sam"}
+		log.Println("Execute")
 		tmpl.ExecuteTemplate(w, "base", hp)
 		return
 	}
