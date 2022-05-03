@@ -7,5 +7,5 @@ import (
 
 func Migrate() {
 	// Migrate the schema
-	database.DB.AutoMigrate(&models.User{}, &models.BodyFat{})
+	database.DB.AutoMigrate(&models.User{}, &models.BodyFat{}, &models.Session{})
 }

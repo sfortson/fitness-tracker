@@ -26,24 +26,35 @@ func parseFloat(s string) float64 {
 	return f
 }
 
-func parseInt(s string) int {
-	i, err := strconv.ParseInt(s, 10, 32)
-	if err != nil {
-		return 0
-	}
-	return int(i)
-}
+// func parseInt(s string) int {
+// 	i, err := strconv.ParseInt(s, 10, 32)
+// 	if err != nil {
+// 		return 0
+// 	}
+// 	return int(i)
+// }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
+	log.Println(w)
+	log.Println(r)
 	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 	tmpl := template.Must(t, err)
 
+	// Get Age
+	// year2, _, _ := time.Now().Date()
+	// year1, _, _ := user.Birthdate.Date()
+	// year := math.Abs(float64(int(year2 - year1)))
+
 	if r.Method != http.MethodPost {
-		hp := homepage{Name: "Sam"}
-		log.Println("Execute")
+		hp := homepage{
+			// Name: user.Username,
+			// FormValues: calculator.BodyFatCalculator{
+			// 	Age: int(year),
+			// },
+		}
 		tmpl.ExecuteTemplate(w, "base", hp)
 		return
 	}
@@ -53,14 +64,14 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		Weight: parseFloat(r.FormValue("weight")),
 		Waist:  parseFloat(r.FormValue("waist")),
 		Height: parseFloat(r.FormValue("height")),
-		Age:    parseInt(r.FormValue("age")),
+		// Age:    int(year),
 	}
 	percentage := bf.Calculate()
 	bmi := bf.CalculateBMI()
 	description, healthrisk := bf.ReadIdeals(float32(percentage))
 
 	hp := homepage{
-		Name:        "Sam",
+		// Name:        user.Username,
 		BodyFat:     percentage,
 		BMI:         bmi,
 		FormValues:  bf,

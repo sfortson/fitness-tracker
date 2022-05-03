@@ -21,3 +21,13 @@ type BodyFat struct {
 	Waist  float32
 	UserID uint
 }
+
+type Session struct {
+	Username     string
+	Expiry       time.Time
+	SessionToken string
+}
+
+func (s Session) IsExpired() bool {
+	return s.Expiry.Before(time.Now())
+}
