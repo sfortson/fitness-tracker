@@ -29,6 +29,8 @@ func main() {
 	r.HandleFunc("/", pages.HomePage).Methods("GET", "POST")
 	r.HandleFunc("/registration", pages.GetRegistration).Methods("GET")
 	r.HandleFunc("/registration", pages.SubmitRegistration).Methods("POST")
+	r.HandleFunc("/login", pages.Login).Methods("GET")
+	r.HandleFunc("/login", pages.LoginPost).Methods("POST")
 	r.Use(loggingMiddleware)
 
 	log.Println("Listening...")

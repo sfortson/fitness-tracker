@@ -19,9 +19,10 @@ type FormValues struct {
 	Password  string
 }
 
-func getTemplate() *template.Template {
+func getTemplate(templateName string) *template.Template {
+	templatePath := "server/templates/" + templateName + ".html"
 	t, err := template.ParseFiles(
-		"server/templates/registration.html",
+		templatePath,
 		"server/templates/base.html")
 	if err != nil {
 		log.Fatal(err)
@@ -30,13 +31,11 @@ func getTemplate() *template.Template {
 }
 
 func GetRegistration(w http.ResponseWriter, r *http.Request) {
-	tmpl := getTemplate()
+	tmpl := getTemplate("registration")
 	tmpl.ExecuteTemplate(w, "base", nil)
 }
 
 func SubmitRegistration(w http.ResponseWriter, r *http.Request) {
-	tmpl := getTemplate()
-
 	hashed, err := bcrypt.GenerateFromPassword([]byte(r.FormValue("password")), bcrypt.DefaultCost)
 	if err != nil {
 		log.Fatal(err)
@@ -57,6 +56,5 @@ func SubmitRegistration(w http.ResponseWriter, r *http.Request) {
 
 	database.DB.Create(&user)
 
-	// database.DB.
-	tmpl.ExecuteTemplate(w, "base", nil)
+	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 }
