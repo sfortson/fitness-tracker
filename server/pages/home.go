@@ -3,10 +3,13 @@ package pages
 import (
 	"html/template"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/sfortson/fitness-tracker/server/calculator"
+	"github.com/sfortson/fitness-tracker/server/database"
 )
 
 type homepage struct {
@@ -34,9 +37,21 @@ func parseFloat(s string) float64 {
 // 	return int(i)
 // }
 
+type SessionToken string
+
+var contextKeySessionToken = SessionToken("session-token")
+
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	log.Println(w)
-	log.Println(r)
+	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
+	if !ok {
+		log.Println("Unable to parse session token")
+	}
+
+	user, err := database.LookupUserByToken(r.Context(), sessionToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
 	if err != nil {
 		log.Fatal(err)
@@ -44,16 +59,16 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(t, err)
 
 	// Get Age
-	// year2, _, _ := time.Now().Date()
-	// year1, _, _ := user.Birthdate.Date()
-	// year := math.Abs(float64(int(year2 - year1)))
+	year2, _, _ := time.Now().Date()
+	year1, _, _ := user.Birthdate.Date()
+	year := math.Abs(float64(int(year2 - year1)))
 
 	if r.Method != http.MethodPost {
 		hp := homepage{
-			// Name: user.Username,
-			// FormValues: calculator.BodyFatCalculator{
-			// 	Age: int(year),
-			// },
+			Name: user.Username,
+			FormValues: calculator.BodyFatCalculator{
+				Age: int(year),
+			},
 		}
 		tmpl.ExecuteTemplate(w, "base", hp)
 		return
@@ -64,14 +79,14 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		Weight: parseFloat(r.FormValue("weight")),
 		Waist:  parseFloat(r.FormValue("waist")),
 		Height: parseFloat(r.FormValue("height")),
-		// Age:    int(year),
+		Age:    int(year),
 	}
 	percentage := bf.Calculate()
 	bmi := bf.CalculateBMI()
 	description, healthrisk := bf.ReadIdeals(float32(percentage))
 
 	hp := homepage{
-		// Name:        user.Username,
+		Name:        user.Username,
 		BodyFat:     percentage,
 		BMI:         bmi,
 		FormValues:  bf,

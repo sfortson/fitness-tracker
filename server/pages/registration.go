@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/sfortson/fitness-tracker/server/database"
-	"github.com/sfortson/fitness-tracker/server/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -46,7 +45,7 @@ func SubmitRegistration(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	user := models.User{
+	user := database.User{
 		Email:     r.FormValue("email"),
 		Username:  r.FormValue("username"),
 		Birthdate: birthdayTime,

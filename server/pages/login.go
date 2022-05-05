@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sfortson/fitness-tracker/server/database"
-	"github.com/sfortson/fitness-tracker/server/models"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,7 +15,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginPost(w http.ResponseWriter, r *http.Request) {
-	var user models.User
+	var user database.User
 	database.DB.Where("username = ?", r.FormValue("username")).First(&user)
 
 	err := bcrypt.CompareHashAndPassword(user.Password, []byte(r.FormValue("password")))
@@ -26,11 +25,11 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionToken := uuid.NewString()
-	expiresAt := time.Now().Add(120 * time.Second)
+	expiresAt := time.Now().Add(30 * time.Minute)
 
-	session := models.Session{
-		Username: user.Username,
-		Expiry: expiresAt,
+	session := database.Session{
+		Username:     user.Username,
+		Expiry:       expiresAt,
 		SessionToken: sessionToken,
 	}
 	database.DB.Create(&session)
