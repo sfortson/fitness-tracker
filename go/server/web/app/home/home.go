@@ -1,12 +1,11 @@
-package pages
+package home
 
 import (
-	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/sfortson/fitness-tracker/server/calculator"
+	"github.com/sfortson/fitness-tracker/server/web/app/templates"
 )
 
 type homepage struct {
@@ -35,13 +34,7 @@ func parseFloat(s string) float64 {
 // }
 
 func HomePage(w http.ResponseWriter, r *http.Request) {
-	log.Println(w)
-	log.Println(r)
-	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	tmpl := template.Must(t, err)
+	tmpl := templates.Templates["home"]
 
 	// Get Age
 	// year2, _, _ := time.Now().Date()

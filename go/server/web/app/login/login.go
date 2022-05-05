@@ -1,4 +1,4 @@
-package pages
+package login
 
 import (
 	"net/http"
@@ -7,11 +7,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/sfortson/fitness-tracker/server/database"
 	"github.com/sfortson/fitness-tracker/server/models"
+	"github.com/sfortson/fitness-tracker/server/web/app/templates"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	tmpl := getTemplate("login")
+	tmpl := templates.Templates["login"]
 	tmpl.ExecuteTemplate(w, "base", nil)
 }
 
