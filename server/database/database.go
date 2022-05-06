@@ -34,14 +34,16 @@ type User struct {
 
 type BodyFat struct {
 	gorm.Model
-	Neck   float64
-	Waist  float64
-	Weight float64
-	Height float64
-	UserID uint
-	Year   int
-	Month  time.Month
-	Day    int
+	UserID     uint
+	Year       int
+	Month      time.Month
+	Day        int
+	Neck       float64
+	Waist      float64
+	Weight     float64
+	Height     float64
+	Percentage float64
+	BMI        float64
 }
 
 type Session struct {

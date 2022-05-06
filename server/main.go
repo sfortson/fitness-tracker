@@ -65,7 +65,8 @@ func main() {
 	database.Migrate()
 
 	r := mux.NewRouter()
-	r.HandleFunc("/", authToken(http.HandlerFunc(pages.HomePage))).Methods("GET", "POST")
+	r.HandleFunc("/", authToken(http.HandlerFunc(pages.GetHome))).Methods("GET")
+	r.HandleFunc("/", authToken(http.HandlerFunc(pages.PostHome))).Methods("POST")
 	r.HandleFunc("/register", pages.GetRegistration).Methods("GET")
 	r.HandleFunc("/register", pages.SubmitRegistration).Methods("POST")
 	r.HandleFunc("/login", pages.Login).Methods("GET")
