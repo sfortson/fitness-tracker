@@ -42,7 +42,46 @@ type SessionToken string
 
 var contextKeySessionToken = SessionToken("session-token")
 
-func HomePage(w http.ResponseWriter, r *http.Request) {
+func getAge(user *database.User) int {
+	// Get Age
+	year2, _, _ := time.Now().Date()
+	year1, _, _ := user.Birthdate.Date()
+	year := int(math.Abs(float64(int(year2 - year1))))
+	return year
+}
+
+func GetHome(w http.ResponseWriter, r *http.Request) {
+	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
+	if !ok {
+		log.Println("Unable to parse session token")
+	}
+
+	user, err := database.LookupUserByToken(r.Context(), sessionToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpl := template.Must(t, err)
+
+	database.DB.Preload("BodyFatMeasurements").Find(&user)
+
+	hp := homepage{
+		Name: user.Username,
+		FormValues: calculator.BodyFatCalculator{
+			Age: getAge(user),
+		},
+		Data: user.BodyFatMeasurements,
+	}
+
+	tmpl.ExecuteTemplate(w, "base", hp)
+}
+
+func PostHome(w http.ResponseWriter, r *http.Request) {
 	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
 	if !ok {
 		log.Println("Unable to parse session token")
@@ -63,17 +102,6 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	year2, month, day := time.Now().Date()
 	year1, _, _ := user.Birthdate.Date()
 	year := math.Abs(float64(int(year2 - year1)))
-
-	if r.Method != http.MethodPost {
-		hp := homepage{
-			Name: user.Username,
-			FormValues: calculator.BodyFatCalculator{
-				Age: int(year),
-			},
-		}
-		tmpl.ExecuteTemplate(w, "base", hp)
-		return
-	}
 
 	neck := parseFloat(r.FormValue("neck"))
 	weight := parseFloat(r.FormValue("weight"))
@@ -100,6 +128,8 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		Year:   year2,
 		Month:  month,
 		Day:    day,
+		Percentage: percentage,
+		BMI: bmi,
 	}
 
 	var foundBodyFat database.BodyFat
@@ -116,8 +146,6 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	log.Println("already added info today")
 
 	database.DB.Preload("BodyFatMeasurements").Find(&user)
-
-	log.Println(user.BodyFatMeasurements)
 
 	hp := homepage{
 		Name:        user.Username,
