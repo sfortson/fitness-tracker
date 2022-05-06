@@ -33,12 +33,19 @@ type User struct {
 }
 
 type BodyFat struct {
-	Neck   float32
-	Waist  float32
+	gorm.Model
+	Neck   float64
+	Waist  float64
+	Weight float64
+	Height float64
 	UserID uint
+	Year   int
+	Month  time.Month
+	Day    int
 }
 
 type Session struct {
+	gorm.Model
 	Username     string
 	Expiry       time.Time
 	SessionToken string
@@ -68,7 +75,6 @@ func LookupUserByToken(_ context.Context, tok string) (*User, error) {
 	if tokenResult.Error != nil {
 		return nil, ErrTokenNotFound
 	}
-	
 
 	var user User
 	userResult := DB.Where("username = ?", session.Username).First(&user)

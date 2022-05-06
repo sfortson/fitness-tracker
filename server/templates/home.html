@@ -70,5 +70,27 @@
         </table>
     </div>
 </div>
+<div class="columns">
+    <div class="column">
+        <h2 class="title is-3">All Data</h2>
+        <p>{{.Data}}</p>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Weight</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $val := .Data}}
+                <tr>
+                    <td>{{$val}}</td>
+                    <td>{{$val.Weight}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>    
+    </div>
+</div>
 </section>
 {{end}}

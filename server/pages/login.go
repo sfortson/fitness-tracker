@@ -18,6 +18,14 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	var user database.User
 	database.DB.Where("username = ?", r.FormValue("username")).First(&user)
 
+	var session database.Session
+	oldToken := database.DB.Where("username = ?", r.FormValue("username")).First(&session)
+
+	if oldToken.Error == nil {
+		// If a session token already exists delete it before issuing a new one
+		database.DB.Delete(&session)
+	}
+
 	err := bcrypt.CompareHashAndPassword(user.Password, []byte(r.FormValue("password")))
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -27,12 +35,12 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	sessionToken := uuid.NewString()
 	expiresAt := time.Now().Add(30 * time.Minute)
 
-	session := database.Session{
+	newSession := database.Session{
 		Username:     user.Username,
 		Expiry:       expiresAt,
 		SessionToken: sessionToken,
 	}
-	database.DB.Create(&session)
+	database.DB.Create(&newSession)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:    "session_token",

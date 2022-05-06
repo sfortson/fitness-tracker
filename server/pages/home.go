@@ -19,6 +19,7 @@ type homepage struct {
 	FormValues  calculator.BodyFatCalculator
 	Description string
 	HealthRisk  string
+	Data        []database.BodyFat
 }
 
 func parseFloat(s string) float64 {
@@ -59,7 +60,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(t, err)
 
 	// Get Age
-	year2, _, _ := time.Now().Date()
+	year2, month, day := time.Now().Date()
 	year1, _, _ := user.Birthdate.Date()
 	year := math.Abs(float64(int(year2 - year1)))
 
@@ -74,16 +75,49 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	neck := parseFloat(r.FormValue("neck"))
+	weight := parseFloat(r.FormValue("weight"))
+	waist := parseFloat(r.FormValue("waist"))
+	height := parseFloat(r.FormValue("height"))
+
 	bf := calculator.BodyFatCalculator{
-		Neck:   parseFloat(r.FormValue("neck")),
-		Weight: parseFloat(r.FormValue("weight")),
-		Waist:  parseFloat(r.FormValue("waist")),
-		Height: parseFloat(r.FormValue("height")),
+		Neck:   neck,
+		Weight: weight,
+		Waist:  waist,
+		Height: height,
 		Age:    int(year),
 	}
 	percentage := bf.Calculate()
 	bmi := bf.CalculateBMI()
 	description, healthrisk := bf.ReadIdeals(float32(percentage))
+
+	bodyFat := database.BodyFat{
+		UserID: user.ID,
+		Neck:   neck,
+		Weight: weight,
+		Waist:  waist,
+		Height: height,
+		Year:   year2,
+		Month:  month,
+		Day:    day,
+	}
+
+	var foundBodyFat database.BodyFat
+	result := database.DB.Where(&database.BodyFat{
+		UserID: user.ID,
+		Year:   year2,
+		Month:  month,
+		Day:    day,
+	}).First(&foundBodyFat)
+
+	if result.Error != nil {
+		database.DB.Create(&bodyFat)
+	}
+	log.Println("already added info today")
+
+	database.DB.Preload("BodyFatMeasurements").Find(&user)
+
+	log.Println(user.BodyFatMeasurements)
 
 	hp := homepage{
 		Name:        user.Username,
@@ -92,6 +126,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 		FormValues:  bf,
 		Description: description,
 		HealthRisk:  healthrisk,
+		Data:        user.BodyFatMeasurements,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", hp)
