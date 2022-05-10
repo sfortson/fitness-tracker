@@ -23,10 +23,11 @@
     "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
     "autoDocstring.docstringFormat": "sphinx",
     "html.format.wrapAttributes": "force-aligned",
+    "html.validate.scripts": false,
     "[html]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true,
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
     },
     "html.format.indentInnerHtml": true
 }

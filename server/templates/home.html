@@ -98,6 +98,21 @@
             </tbody>
         </table>    
     </div>
+    <div class="column">
+        <div id="myDiv"></div>
+    </div>
 </div>
 </section>
+<script>
+    var trace1 = {
+        x: {{.DateList}},
+        y: {{.BFList}},
+        mode: 'lines',
+        name: 'Body Fat Percentage'
+      };
+      
+      var data = [trace1];
+      
+      Plotly.newPlot('myDiv', data);
+</script>
 {{end}}
