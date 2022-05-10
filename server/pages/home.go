@@ -6,6 +6,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/sfortson/fitness-tracker/server/calculator"
@@ -20,6 +21,8 @@ type homepage struct {
 	Description string
 	HealthRisk  string
 	Data        []database.BodyFat
+	DateList    []string
+	BFList      []float64
 }
 
 func parseFloat(s string) float64 {
@@ -29,14 +32,6 @@ func parseFloat(s string) float64 {
 	}
 	return f
 }
-
-// func parseInt(s string) int {
-// 	i, err := strconv.ParseInt(s, 10, 32)
-// 	if err != nil {
-// 		return 0
-// 	}
-// 	return int(i)
-// }
 
 type SessionToken string
 
@@ -50,13 +45,31 @@ func getAge(user *database.User) int {
 	return year
 }
 
-func GetHome(w http.ResponseWriter, r *http.Request) {
+func getUser(r *http.Request) (*database.User, error) {
 	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
 	if !ok {
 		log.Println("Unable to parse session token")
 	}
 
 	user, err := database.LookupUserByToken(r.Context(), sessionToken)
+
+	return user, err
+}
+
+func dataLists(user *database.User) ([]string, []float64) {
+	database.DB.Preload("BodyFatMeasurements").Find(&user)
+
+	var dateList []string
+	var bfList []float64
+	for _, d := range user.BodyFatMeasurements {
+		dateList = append(dateList, strings.Split(d.CreatedAt.String(), " ")[0])
+		bfList = append(bfList, d.Percentage)
+	}
+	return dateList, bfList
+}
+
+func GetHome(w http.ResponseWriter, r *http.Request) {
+	user, err := getUser(r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,26 +81,44 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := template.Must(t, err)
 
-	database.DB.Preload("BodyFatMeasurements").Find(&user)
+	dateList, bfList := dataLists(user)
 
 	hp := homepage{
 		Name: user.Username,
 		FormValues: calculator.BodyFatCalculator{
 			Age: getAge(user),
 		},
-		Data: user.BodyFatMeasurements,
+		Data:     user.BodyFatMeasurements,
+		DateList: dateList,
+		BFList:   bfList,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", hp)
 }
 
-func PostHome(w http.ResponseWriter, r *http.Request) {
-	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
-	if !ok {
-		log.Println("Unable to parse session token")
-	}
+func addBodyFatToDatabase(bodyFat database.BodyFat) {
+	var foundBodyFat database.BodyFat
+	result := database.DB.Where(&database.BodyFat{
+		UserID: bodyFat.UserID,
+		Year:   bodyFat.Year,
+		Month:  bodyFat.Month,
+		Day:    bodyFat.Day,
+	}).First(&foundBodyFat)
 
-	user, err := database.LookupUserByToken(r.Context(), sessionToken)
+	if result.Error != nil {
+		database.DB.Create(&bodyFat)
+	} else {
+		foundBodyFat.BMI = bodyFat.BMI
+		foundBodyFat.Percentage = bodyFat.Percentage
+		foundBodyFat.Neck = bodyFat.Neck
+		foundBodyFat.Waist = bodyFat.Waist
+		foundBodyFat.Weight = bodyFat.Waist
+		database.DB.Save(&foundBodyFat)
+	}
+}
+
+func PostHome(w http.ResponseWriter, r *http.Request) {
+	user, err := getUser(r)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -120,32 +151,23 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 	description, healthrisk := bf.ReadIdeals(float32(percentage))
 
 	bodyFat := database.BodyFat{
-		UserID: user.ID,
-		Neck:   neck,
-		Weight: weight,
-		Waist:  waist,
-		Height: height,
-		Year:   year2,
-		Month:  month,
-		Day:    day,
+		UserID:     user.ID,
+		Neck:       neck,
+		Weight:     weight,
+		Waist:      waist,
+		Height:     height,
+		Year:       year2,
+		Month:      month,
+		Day:        day,
 		Percentage: percentage,
-		BMI: bmi,
+		BMI:        bmi,
 	}
 
-	var foundBodyFat database.BodyFat
-	result := database.DB.Where(&database.BodyFat{
-		UserID: user.ID,
-		Year:   year2,
-		Month:  month,
-		Day:    day,
-	}).First(&foundBodyFat)
-
-	if result.Error != nil {
-		database.DB.Create(&bodyFat)
+	if (neck != 0 || waist != 0 || weight != 0 || height != 0) {
+		addBodyFatToDatabase(bodyFat)
 	}
-	log.Println("already added info today")
 
-	database.DB.Preload("BodyFatMeasurements").Find(&user)
+	dateList, bfList := dataLists(user)
 
 	hp := homepage{
 		Name:        user.Username,
@@ -155,6 +177,8 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 		Description: description,
 		HealthRisk:  healthrisk,
 		Data:        user.BodyFatMeasurements,
+		DateList:    dateList,
+		BFList:      bfList,
 	}
 
 	tmpl.ExecuteTemplate(w, "base", hp)
