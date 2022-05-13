@@ -23,7 +23,6 @@ func authToken(next http.Handler) http.HandlerFunc {
 		c, err := r.Cookie("session_token")
 		if err != nil {
 			// If the cookie is not set, return an unauthorized status
-			log.Println("cookie not set")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
@@ -33,7 +32,6 @@ func authToken(next http.Handler) http.HandlerFunc {
 		result := database.DB.Where("session_token = ?", sessionToken).First(&session)
 		if result.Error != nil {
 			// If the session token is not present in session map, return an unauthorized error
-			log.Println("session token not present")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
@@ -42,12 +40,10 @@ func authToken(next http.Handler) http.HandlerFunc {
 		// an unauthorized status
 		if session.IsExpired() {
 			database.DB.Delete(&session)
-			log.Println("session token expired")
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 
-		log.Println("session token good to go")
 		var user database.User
 		database.DB.Where("username = ?", session.Username).First(&user)
 
