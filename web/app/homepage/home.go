@@ -1,15 +1,16 @@
-package pages
+package homepage
 
 import (
-	"html/template"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/calculator"
-	"github.com/sfortson/fitness-tracker/server/database"
+	"github.com/sfortson/fitness-tracker/internal/calculator"
+	"github.com/sfortson/fitness-tracker/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/helpers"
+	"github.com/sfortson/fitness-tracker/internal/session"
+	templates "github.com/sfortson/fitness-tracker/web/app"
 )
 
 type homeForm struct {
@@ -31,20 +32,8 @@ type homepage struct {
 	BFList      []float64
 }
 
-func ParseFloat(s string) float64 {
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return 0.0
-	}
-	return f
-}
-
-type SessionToken string
-
-var contextKeySessionToken = SessionToken("session-token")
-
 func getUser(r *http.Request) (*database.User, error) {
-	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
+	sessionToken, ok := r.Context().Value(session.ContextKeySessionToken).(string)
 	if !ok {
 		log.Println("Unable to parse session token")
 	}
@@ -111,12 +100,7 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tmpl := template.Must(t, err)
+	tmpl := templates.WebTemplates["homepage"]
 
 	dateList, bfList := dataLists(user)
 
@@ -142,18 +126,14 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	tmpl := template.Must(t, err)
+	tmpl := templates.WebTemplates["homepage"]
 
 	// Get today's date
 	year2, month, day := time.Now().Date()
 
-	neck := ParseFloat(r.FormValue("neck"))
-	weight := ParseFloat(r.FormValue("weight"))
-	waist := ParseFloat(r.FormValue("waist"))
+	neck := helpers.ParseFloat(r.FormValue("neck"))
+	weight := helpers.ParseFloat(r.FormValue("weight"))
+	waist := helpers.ParseFloat(r.FormValue("waist"))
 
 	bf := calculator.BodyFatCalculator{
 		Neck:   neck,

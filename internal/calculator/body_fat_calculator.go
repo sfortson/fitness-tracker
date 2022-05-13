@@ -5,7 +5,7 @@ import (
 	"log"
 	"math"
 
-	pb "github.com/sfortson/fitness-tracker/server/proto"
+	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
 	"google.golang.org/protobuf/proto"
 )
 
