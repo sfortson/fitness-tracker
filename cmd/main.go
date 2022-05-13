@@ -7,8 +7,13 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/mux"
-	"github.com/sfortson/fitness-tracker/server/database"
-	"github.com/sfortson/fitness-tracker/server/pages"
+	"github.com/sfortson/fitness-tracker/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/session"
+	"github.com/sfortson/fitness-tracker/web/app/homepage"
+	"github.com/sfortson/fitness-tracker/web/app/login"
+	"github.com/sfortson/fitness-tracker/web/app/logout"
+	"github.com/sfortson/fitness-tracker/web/app/registration"
+	"github.com/sfortson/fitness-tracker/web/app"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -27,9 +32,9 @@ func authToken(next http.Handler) http.HandlerFunc {
 			return
 		}
 
-		var session database.Session
+		var dbSession database.Session
 		sessionToken := c.Value
-		result := database.DB.Where("session_token = ?", sessionToken).First(&session)
+		result := database.DB.Where("session_token = ?", sessionToken).First(&dbSession)
 		if result.Error != nil {
 			// If the session token is not present in session map, return an unauthorized error
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
@@ -38,16 +43,16 @@ func authToken(next http.Handler) http.HandlerFunc {
 
 		// If the session is present, but has expired, we can delete the session, and return
 		// an unauthorized status
-		if session.IsExpired() {
-			database.DB.Delete(&session)
+		if dbSession.IsExpired() {
+			database.DB.Delete(&dbSession)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 
 		var user database.User
-		database.DB.Where("username = ?", session.Username).First(&user)
+		database.DB.Where("username = ?", dbSession.Username).First(&user)
 
-		contextKeySessionToken := pages.SessionToken("session-token")
+		contextKeySessionToken := session.ContextKeySessionToken
 		r = r.WithContext(context.WithValue(r.Context(), contextKeySessionToken, sessionToken))
 		next.ServeHTTP(w, r)
 	})
@@ -60,14 +65,17 @@ func main() {
 	log.Println("Migrating DB...")
 	database.Migrate()
 
+	log.Println("Preparing templates...")
+	templates.InitWebTemplates()
+
 	r := mux.NewRouter()
-	r.HandleFunc("/", authToken(http.HandlerFunc(pages.GetHome))).Methods("GET")
-	r.HandleFunc("/", authToken(http.HandlerFunc(pages.PostHome))).Methods("POST")
-	r.HandleFunc("/register", pages.GetRegistration).Methods("GET")
-	r.HandleFunc("/register", pages.SubmitRegistration).Methods("POST")
-	r.HandleFunc("/login", pages.Login).Methods("GET")
-	r.HandleFunc("/login", pages.LoginPost).Methods("POST")
-	r.HandleFunc("/logout", pages.Logout)
+	r.HandleFunc("/", authToken(http.HandlerFunc(homepage.GetHome))).Methods("GET")
+	r.HandleFunc("/", authToken(http.HandlerFunc(homepage.PostHome))).Methods("POST")
+	r.HandleFunc("/register", registration.GetRegistration).Methods("GET")
+	r.HandleFunc("/register", registration.SubmitRegistration).Methods("POST")
+	r.HandleFunc("/login", login.Login).Methods("GET")
+	r.HandleFunc("/login", login.LoginPost).Methods("POST")
+	r.HandleFunc("/logout", logout.Logout)
 	r.Use(loggingMiddleware)
 
 	log.Println("Listening...")

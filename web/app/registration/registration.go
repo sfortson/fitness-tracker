@@ -1,12 +1,13 @@
-package pages
+package registration
 
 import (
-	"html/template"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/database"
+	"github.com/sfortson/fitness-tracker/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/helpers"
+	templates "github.com/sfortson/fitness-tracker/web/app"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -19,19 +20,8 @@ type FormValues struct {
 	Height    float64
 }
 
-func getTemplate(templateName string) *template.Template {
-	templatePath := "server/templates/" + templateName + ".html"
-	t, err := template.ParseFiles(
-		templatePath,
-		"server/templates/base.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return template.Must(t, err)
-}
-
 func GetRegistration(w http.ResponseWriter, r *http.Request) {
-	tmpl := getTemplate("registration")
+	tmpl := templates.WebTemplates["register"]
 	tmpl.ExecuteTemplate(w, "base", nil)
 }
 
@@ -52,7 +42,7 @@ func SubmitRegistration(w http.ResponseWriter, r *http.Request) {
 		Birthdate: birthdayTime,
 		Password:  hashed,
 		Sex:       r.FormValue("sex"),
-		Height:    ParseFloat(r.FormValue("height")),
+		Height:    helpers.ParseFloat(r.FormValue("height")),
 	}
 
 	database.DB.Create(&user)

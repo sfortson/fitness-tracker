@@ -1,10 +1,10 @@
-package pages
+package logout
 
 import (
 	"net/http"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/database"
+	"github.com/sfortson/fitness-tracker/internal/database"
 )
 
 func Logout(w http.ResponseWriter, r *http.Request) {
