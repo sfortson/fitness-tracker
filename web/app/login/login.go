@@ -6,9 +6,41 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sfortson/fitness-tracker/internal/database"
-	"golang.org/x/crypto/bcrypt"
 	templates "github.com/sfortson/fitness-tracker/web/app"
+	"golang.org/x/crypto/bcrypt"
 )
+
+type loginform struct {
+	username string
+	password string
+	Errors   map[string]string
+}
+
+func (lf *loginform) validateLoginForm() (database.User, bool) {
+	lf.Errors = make(map[string]string)
+
+	if lf.username == "" {
+		lf.Errors["username"] = "Must enter a username"
+	}
+
+	if lf.password == "" {
+		lf.Errors["password"] = "Must enter a password"
+	}
+
+	var user database.User
+	result := database.DB.Where("username = ?", lf.username).First(&user)
+
+	if result.Error != nil {
+		lf.Errors["usernamePassword"] = "Username or password is incorrect"
+	} else {
+		err := bcrypt.CompareHashAndPassword(user.Password, []byte(lf.password))
+		if err != nil {
+			lf.Errors["usernamePassword"] = "Username or password is incorrect"
+		}
+	}
+
+	return user, len(lf.Errors) == 0
+}
 
 func Login(w http.ResponseWriter, r *http.Request) {
 	tmpl := templates.WebTemplates["login"]
@@ -16,21 +48,25 @@ func Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func LoginPost(w http.ResponseWriter, r *http.Request) {
-	var user database.User
-	database.DB.Where("username = ?", r.FormValue("username")).First(&user)
+	loginForm := loginform{
+		username: r.FormValue("username"),
+		password: r.FormValue("password"),
+	}
+
+	user, validated := loginForm.validateLoginForm()
+
+	if !validated {
+		tmpl := templates.WebTemplates["login"]
+		tmpl.ExecuteTemplate(w, "base", loginForm)
+		return
+	}
 
 	var session database.Session
-	oldToken := database.DB.Where("username = ?", r.FormValue("username")).First(&session)
+	oldToken := database.DB.Where("username = ?", loginForm.password).First(&session)
 
 	if oldToken.Error == nil {
 		// If a session token already exists delete it before issuing a new one
 		database.DB.Delete(&session)
-	}
-
-	err := bcrypt.CompareHashAndPassword(user.Password, []byte(r.FormValue("password")))
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
 	}
 
 	sessionToken := uuid.NewString()
