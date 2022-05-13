@@ -6,37 +6,32 @@
             <h2 class="title is-3">Enter Information</h2>
     <form method="POST">
         <div class="field">
-            <label class="label">Age</label>
-            <div class="control">
-                <input class="input" type="text" name="age" placeholder="Age" {{ if .FormValues.Age }} value="{{ .FormValues.Age }}" {{ end }}>
-            </div>
-        </div>
-        
-        <div class="field">
             <label class="label">Weight In Pounds</label>
-            <div class="control">
+            <div class="control has-icons-right">
                 <input class="input" type="text" name="weight" placeholder="Weight (lbs.)" {{ if .FormValues.Weight }} value="{{ .FormValues.Weight }}" {{ end }}>
+                {{ with .FormValues.Errors.Weight }}
+                    <div class="help is-danger">{{ . }}</div>
+                {{ end }}
             </div>
-        </div>
-
-        <div class="field">
-        <label class="label">Height In Inches</label>
-        <div class="control">
-            <input class="input" type="text" name="height" placeholder="Height (in.)" {{ if .FormValues.Height }} value="{{ .FormValues.Height }}" {{ end }}>
-        </div>
         </div>
         
         <div class="field">
         <label class="label">Waist In Inches</label>
         <div class="control">
             <input class="input" type="text" name="waist" placeholder="Waist (in.)" {{ if .FormValues.Waist }} value="{{ .FormValues.Waist }}" {{ end }}>
+            {{ with .FormValues.Errors.Waist }}
+                <div class="help is-danger">{{ . }}</div>
+            {{ end }}
         </div>
         </div>
 
         <div class="field">
             <label class="label">Neck In Inches</label>
             <div class="control">
-              <input class="input" type="text" name="neck" placeholder="Neck (in.)" {{ if .FormValues.Neck }} value="{{ .FormValues.Neck }}" {{ end }}>
+                <input class="input" type="text" name="neck" placeholder="Neck (in.)" {{ if .FormValues.Neck }} value="{{ .FormValues.Neck }}" {{ end }}>
+                {{ with .FormValues.Errors.Neck }}
+                    <div class="help is-danger">{{ . }}</div>
+                {{ end }}
             </div>
         </div>
 

@@ -16,6 +16,7 @@ type FormValues struct {
 	Birthdate time.Time
 	Email     string
 	Password  string
+	Height    float64
 }
 
 func getTemplate(templateName string) *template.Template {
@@ -51,6 +52,7 @@ func SubmitRegistration(w http.ResponseWriter, r *http.Request) {
 		Birthdate: birthdayTime,
 		Password:  hashed,
 		Sex:       r.FormValue("sex"),
+		Height:    ParseFloat(r.FormValue("height")),
 	}
 
 	database.DB.Create(&user)

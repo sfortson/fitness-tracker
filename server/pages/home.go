@@ -3,7 +3,6 @@ package pages
 import (
 	"html/template"
 	"log"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,11 +12,18 @@ import (
 	"github.com/sfortson/fitness-tracker/server/database"
 )
 
+type homeForm struct {
+	Neck   float64
+	Weight float64
+	Waist  float64
+	Errors map[string]string
+}
+
 type homepage struct {
 	Name        string
 	BodyFat     float64
 	BMI         float64
-	FormValues  calculator.BodyFatCalculator
+	FormValues  homeForm
 	Description string
 	HealthRisk  string
 	Data        []database.BodyFat
@@ -25,7 +31,7 @@ type homepage struct {
 	BFList      []float64
 }
 
-func parseFloat(s string) float64 {
+func ParseFloat(s string) float64 {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return 0.0
@@ -36,14 +42,6 @@ func parseFloat(s string) float64 {
 type SessionToken string
 
 var contextKeySessionToken = SessionToken("session-token")
-
-func getAge(user *database.User) int {
-	// Get Age
-	year2, _, _ := time.Now().Date()
-	year1, _, _ := user.Birthdate.Date()
-	year := int(math.Abs(float64(int(year2 - year1))))
-	return year
-}
 
 func getUser(r *http.Request) (*database.User, error) {
 	sessionToken, ok := r.Context().Value(contextKeySessionToken).(string)
@@ -68,34 +66,6 @@ func dataLists(user *database.User) ([]string, []float64) {
 	return dateList, bfList
 }
 
-func GetHome(w http.ResponseWriter, r *http.Request) {
-	user, err := getUser(r)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	tmpl := template.Must(t, err)
-
-	dateList, bfList := dataLists(user)
-
-	hp := homepage{
-		Name: user.Username,
-		FormValues: calculator.BodyFatCalculator{
-			Age: getAge(user),
-		},
-		Data:     user.BodyFatMeasurements,
-		DateList: dateList,
-		BFList:   bfList,
-	}
-
-	tmpl.ExecuteTemplate(w, "base", hp)
-}
-
 func addBodyFatToDatabase(bodyFat database.BodyFat) {
 	var foundBodyFat database.BodyFat
 	result := database.DB.Where(&database.BodyFat{
@@ -117,7 +87,56 @@ func addBodyFatToDatabase(bodyFat database.BodyFat) {
 	}
 }
 
+func (form *homeForm) validateHomeForm() bool {
+	form.Errors = make(map[string]string)
+
+	if form.Neck <= 0 {
+		form.Errors["Neck"] = "Invalid neck size"
+	}
+
+	if form.Waist <= 0 {
+		form.Errors["Waist"] = "Invalid waist size"
+	}
+
+	if form.Weight <= 0 {
+		form.Errors["Weight"] = "Invalid weight"
+	}
+
+	return len(form.Errors) == 0
+}
+
+func GetHome(w http.ResponseWriter, r *http.Request) {
+	user, err := getUser(r)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	t, err := template.ParseFiles("server/templates/home.html", "server/templates/base.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tmpl := template.Must(t, err)
+
+	dateList, bfList := dataLists(user)
+
+	hp := homepage{
+		Name:     user.Username,
+		Data:     user.BodyFatMeasurements,
+		DateList: dateList,
+		BFList:   bfList,
+	}
+
+	tmpl.ExecuteTemplate(w, "base", hp)
+}
+
 func PostHome(w http.ResponseWriter, r *http.Request) {
+	refer := strings.Split(r.Header.Get("Referer"), "/")
+	if refer[len(refer)-1] == "login" || refer[len(refer)-1] == "register" {
+		GetHome(w, r)
+		return
+	}
+
 	user, err := getUser(r)
 	if err != nil {
 		log.Fatal(err)
@@ -129,42 +148,28 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl := template.Must(t, err)
 
-	// Get Age
+	// Get today's date
 	year2, month, day := time.Now().Date()
-	year1, _, _ := user.Birthdate.Date()
-	year := math.Abs(float64(int(year2 - year1)))
 
-	neck := parseFloat(r.FormValue("neck"))
-	weight := parseFloat(r.FormValue("weight"))
-	waist := parseFloat(r.FormValue("waist"))
-	height := parseFloat(r.FormValue("height"))
+	neck := ParseFloat(r.FormValue("neck"))
+	weight := ParseFloat(r.FormValue("weight"))
+	waist := ParseFloat(r.FormValue("waist"))
 
 	bf := calculator.BodyFatCalculator{
 		Neck:   neck,
 		Weight: weight,
 		Waist:  waist,
-		Height: height,
-		Age:    int(year),
+		Height: user.Height,
+		Age:    user.GetAge(),
 	}
 	percentage := bf.Calculate()
 	bmi := bf.CalculateBMI()
 	description, healthrisk := bf.ReadIdeals(float32(percentage))
 
-	bodyFat := database.BodyFat{
-		UserID:     user.ID,
-		Neck:       neck,
-		Weight:     weight,
-		Waist:      waist,
-		Height:     height,
-		Year:       year2,
-		Month:      month,
-		Day:        day,
-		Percentage: percentage,
-		BMI:        bmi,
-	}
-
-	if (neck != 0 || waist != 0 || weight != 0 || height != 0) {
-		addBodyFatToDatabase(bodyFat)
+	hf := &homeForm{
+		Neck:   neck,
+		Waist:  waist,
+		Weight: weight,
 	}
 
 	dateList, bfList := dataLists(user)
@@ -173,13 +178,34 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 		Name:        user.Username,
 		BodyFat:     percentage,
 		BMI:         bmi,
-		FormValues:  bf,
+		FormValues:  *hf,
 		Description: description,
 		HealthRisk:  healthrisk,
 		Data:        user.BodyFatMeasurements,
 		DateList:    dateList,
 		BFList:      bfList,
 	}
+
+	if !hf.validateHomeForm() {
+		hp.FormValues = *hf
+		tmpl.ExecuteTemplate(w, "base", hp)
+		return
+	}
+
+	bodyFat := database.BodyFat{
+		UserID:     user.ID,
+		Neck:       neck,
+		Weight:     weight,
+		Waist:      waist,
+		Height:     user.Height,
+		Year:       year2,
+		Month:      month,
+		Day:        day,
+		Percentage: percentage,
+		BMI:        bmi,
+	}
+
+	addBodyFatToDatabase(bodyFat)
 
 	tmpl.ExecuteTemplate(w, "base", hp)
 }

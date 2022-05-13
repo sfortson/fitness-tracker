@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"errors"
+	"math"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -30,6 +31,7 @@ type User struct {
 	Birthdate           time.Time
 	Password            []byte
 	Sex                 string
+	Height              float64
 }
 
 type BodyFat struct {
@@ -85,4 +87,12 @@ func LookupUserByToken(_ context.Context, tok string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+func (user *User) GetAge() int {
+	// Get Age
+	year2, _, _ := time.Now().Date()
+	year1, _, _ := user.Birthdate.Date()
+	year := int(math.Abs(float64(int(year2 - year1))))
+	return year
 }
