@@ -58,6 +58,10 @@ func authToken(next http.Handler) http.HandlerFunc {
 	})
 }
 
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "web/static/favicon.ico")
+}
+
 func main() {
 	log.Println("Init DB...")
 	database.Open()
@@ -69,6 +73,7 @@ func main() {
 	templates.InitWebTemplates()
 
 	r := mux.NewRouter()
+	r.HandleFunc("/favicon.ico", faviconHandler)
 	r.HandleFunc("/", authToken(http.HandlerFunc(homepage.GetHome))).Methods("GET")
 	r.HandleFunc("/", authToken(http.HandlerFunc(homepage.PostHome))).Methods("POST")
 	r.HandleFunc("/register", registration.GetRegistration).Methods("GET")

@@ -105,9 +105,29 @@
         mode: 'lines',
         name: 'Body Fat Percentage'
       };
+
+      var trace2 = {
+        x: {{.DateList}},
+        y: {{.MaxList}},
+        mode: 'lines',
+        name: 'Maximum'
+      };
       
-      var data = [trace1];
+      var trace3 = {
+        x: {{.DateList}},
+        y: {{.MinList}},
+        mode: 'lines',
+        name: 'Minimum',
+        fillcolor: {{.RegionColor}}, 
+        fill: 'tonexty'
+      };
       
-      Plotly.newPlot('myDiv', data);
+      var data = [trace1, trace2, trace3];
+
+      var layout = {
+        yaxis: {range: [0, 50]}
+      };
+      
+      Plotly.newPlot('myDiv', data, layout);
 </script>
 {{end}}
