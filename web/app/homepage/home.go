@@ -30,6 +30,9 @@ type homepage struct {
 	Data        []database.BodyFat
 	DateList    []string
 	BFList      []float64
+	MinList     []float32
+	MaxList     []float32
+	RegionColor string
 }
 
 func getUser(r *http.Request) (*database.User, error) {
@@ -43,16 +46,51 @@ func getUser(r *http.Request) (*database.User, error) {
 	return user, err
 }
 
-func dataLists(user *database.User) ([]string, []float64) {
+func dataLists(user *database.User, ideals calculator.Ideal) ([]string, []float64, []float32, []float32) {
 	database.DB.Preload("BodyFatMeasurements").Find(&user)
 
 	var dateList []string
 	var bfList []float64
-	for _, d := range user.BodyFatMeasurements {
-		dateList = append(dateList, strings.Split(d.CreatedAt.String(), " ")[0])
-		bfList = append(bfList, d.Percentage)
+	var minList []float32
+	var maxList []float32
+
+	if len(user.BodyFatMeasurements) == 0 {
+		return dateList, bfList, minList, maxList
 	}
-	return dateList, bfList
+
+	startDate := user.BodyFatMeasurements[0].CreatedAt
+	endDate := time.Now()
+	currentIdx := 0
+	dateList = append(dateList, strings.Split(startDate.String(), " ")[0])
+	bfList = append(bfList, user.BodyFatMeasurements[currentIdx].Percentage)
+	minList = append(minList, ideals.CurrentMin)
+	maxList = append(maxList, ideals.CurrentMax)
+	for d := startDate; !d.After(endDate); d = d.AddDate(0, 0, 1) {
+		if currentIdx < len(user.BodyFatMeasurements)-1 {
+			userTime := user.BodyFatMeasurements[currentIdx+1].CreatedAt
+			if userTime.Year() <= d.Year() && userTime.YearDay() <= d.YearDay() {
+				currentIdx = currentIdx + 1
+			}
+		}
+		dateList = append(dateList, strings.Split(d.String(), " ")[0])
+		bfList = append(bfList, user.BodyFatMeasurements[currentIdx].Percentage)
+		minList = append(minList, ideals.CurrentMin)
+		maxList = append(maxList, ideals.CurrentMax)
+	}
+	return dateList, bfList, minList, maxList
+}
+
+func regionColor(ideals calculator.Ideal) string {
+	color := "rgba(0,40,100,0.2)"
+	switch ideals.HealthRisk {
+	case "Increased":
+		color = "rgba(255,0,0,0.2)"
+	case "Healthy":
+		color = "rgba(0,255,0,0.2)"
+	default:
+		color = "rgba(0,40,100,0.2)"
+	}
+	return color
 }
 
 func addBodyFatToDatabase(bodyFat database.BodyFat) {
@@ -102,13 +140,24 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := templates.WebTemplates["homepage"]
 
-	dateList, bfList := dataLists(user)
+	bf := calculator.BodyFatCalculator{
+		Age: user.GetAge(),
+	}
+	database.DB.Preload("BodyFatMeasurements").Find(&user)
+	ideals := bf.ReadIdeals(
+		float32(user.BodyFatMeasurements[len(user.BodyFatMeasurements)-1].Percentage))
+
+	dateList, bfList, minList, maxList :=
+		dataLists(user, ideals)
 
 	hp := homepage{
-		Name:     user.Username,
-		Data:     user.BodyFatMeasurements,
-		DateList: dateList,
-		BFList:   bfList,
+		Name:        user.Username,
+		Data:        user.BodyFatMeasurements,
+		DateList:    dateList,
+		BFList:      bfList,
+		MinList:     minList,
+		MaxList:     maxList,
+		RegionColor: regionColor(ideals),
 	}
 
 	tmpl.ExecuteTemplate(w, "base", hp)
@@ -144,7 +193,7 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 	}
 	percentage := bf.Calculate()
 	bmi := bf.CalculateBMI()
-	description, healthrisk := bf.ReadIdeals(float32(percentage))
+	ideals := bf.ReadIdeals(float32(percentage))
 
 	hf := &homeForm{
 		Neck:   neck,
@@ -152,18 +201,21 @@ func PostHome(w http.ResponseWriter, r *http.Request) {
 		Weight: weight,
 	}
 
-	dateList, bfList := dataLists(user)
+	dateList, bfList, minList, maxList := dataLists(user, ideals)
 
 	hp := homepage{
 		Name:        user.Username,
 		BodyFat:     percentage,
 		BMI:         bmi,
 		FormValues:  *hf,
-		Description: description,
-		HealthRisk:  healthrisk,
+		Description: ideals.Descripton,
+		HealthRisk:  ideals.HealthRisk,
 		Data:        user.BodyFatMeasurements,
 		DateList:    dateList,
 		BFList:      bfList,
+		MinList:     minList,
+		MaxList:     maxList,
+		RegionColor: regionColor(ideals),
 	}
 
 	if !hf.validateHomeForm() {

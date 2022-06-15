@@ -22,6 +22,8 @@ type BodyFatCalculator struct {
 type Ideal struct {
 	Descripton string
 	HealthRisk string
+	CurrentMax float32
+	CurrentMin float32
 }
 
 func (bf BodyFatCalculator) Calculate() float64 {
@@ -36,8 +38,9 @@ func (bf BodyFatCalculator) CalculateBMI() float64 {
 	return math.Trunc(bmi*100) / 100
 }
 
-func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) (description, healthrisk string) {
-	content, err := ioutil.ReadFile("/Users/sfortson/github-projects/fitness-tracker/server/test.proto")
+func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) (Ideal) {
+	content, err := 
+		ioutil.ReadFile("/Users/sfortson/github-projects/fitness-tracker/internal/calculator/test.proto")
 	if err != nil {
 		log.Fatalln("Failed to read proto:", err)
 	}
@@ -56,10 +59,12 @@ func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) (description
 				if body_fat_percentage >= float32(*bf.Min) && body_fat_percentage <= float32(*bf.Max) {
 					ideal.Descripton = *bf.Description
 					ideal.HealthRisk = *bf.HealthRisk
+					ideal.CurrentMax = *bf.Max
+					ideal.CurrentMin = *bf.Min
 				}
 			}
 		}
 	}
 
-	return ideal.Descripton, ideal.HealthRisk
+	return ideal
 }
