@@ -7,13 +7,14 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/mux"
+	"github.com/sfortson/fitness-tracker/internal/config"
 	"github.com/sfortson/fitness-tracker/internal/database"
 	"github.com/sfortson/fitness-tracker/internal/session"
+	templates "github.com/sfortson/fitness-tracker/web/app"
 	"github.com/sfortson/fitness-tracker/web/app/homepage"
 	"github.com/sfortson/fitness-tracker/web/app/login"
 	"github.com/sfortson/fitness-tracker/web/app/logout"
 	"github.com/sfortson/fitness-tracker/web/app/registration"
-	"github.com/sfortson/fitness-tracker/web/app"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
@@ -63,8 +64,14 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	config, configerr := config.LoadConfig("config")
+	if configerr != nil {
+		log.Fatalln("unable to load config")
+	}
+	log.Println("Load Config...")
+
 	log.Println("Init DB...")
-	database.Open()
+	database.Open(config)
 
 	log.Println("Migrating DB...")
 	database.Migrate()
