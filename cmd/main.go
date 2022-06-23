@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/mux"
@@ -91,7 +93,11 @@ func main() {
 	r.Use(loggingMiddleware)
 
 	log.Println("Listening...")
-	err := http.ListenAndServe(":8080", r)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8000"
+	}
+	err := http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 	if err != nil {
 		log.Fatal(err)
 	}
