@@ -28,7 +28,6 @@ func LoadConfig(path string) (config Config, err error) {
 	err = viper.ReadInConfig()
 	if err != nil {
 		log.Println(err)
-		return
 	}
 
 	err = viper.Unmarshal(&config)
