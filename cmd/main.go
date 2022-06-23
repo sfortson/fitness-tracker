@@ -91,7 +91,7 @@ func main() {
 	r.Use(loggingMiddleware)
 
 	log.Println("Listening...")
-	err := http.ListenAndServe(":8000", r)
+	err := http.ListenAndServe(":80", r)
 	if err != nil {
 		log.Fatal(err)
 	}
