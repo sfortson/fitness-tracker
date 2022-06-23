@@ -62,7 +62,7 @@ func LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var session database.Session
-	oldToken := database.DB.Where("username = ?", loginForm.password).First(&session)
+	oldToken := database.DB.Where("username = ?", loginForm.username).First(&session)
 
 	if oldToken.Error == nil {
 		// If a session token already exists delete it before issuing a new one
