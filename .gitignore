@@ -3,3 +3,4 @@ src/__pycache__
 server/server
 *.db
 .DS_Store
+config/*.env
