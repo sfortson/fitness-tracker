@@ -67,6 +67,7 @@ func faviconHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	config, configerr := config.LoadConfig("config")
+	log.Println(config)
 	if configerr != nil {
 		log.Fatalln("unable to load config")
 	}
