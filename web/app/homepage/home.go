@@ -144,8 +144,18 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
 		Age: user.GetAge(),
 	}
 	database.DB.Preload("BodyFatMeasurements").Find(&user)
-	ideals := bf.ReadIdeals(
-		float32(user.BodyFatMeasurements[len(user.BodyFatMeasurements)-1].Percentage))
+
+	ideals := calculator.Ideal{
+		Descripton: "",
+		HealthRisk: "",
+		CurrentMax: 0,
+		CurrentMin: 0,
+	}
+
+	if len(user.BodyFatMeasurements) > 0 {
+		ideals = bf.ReadIdeals(
+			float32(user.BodyFatMeasurements[len(user.BodyFatMeasurements)-1].Percentage))
+	}
 
 	dateList, bfList, minList, maxList :=
 		dataLists(user, ideals)
