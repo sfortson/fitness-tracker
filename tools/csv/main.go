@@ -6,10 +6,11 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
-	"google.golang.org/protobuf/proto"
 	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func write_proto(data [][]string) {
@@ -64,14 +65,16 @@ func write_proto(data [][]string) {
 		fmt.Println(err)
 	}
 
-	if err := ioutil.WriteFile("/Users/sfortson/github-projects/fitness-tracker/internal/calculator/test.proto", out, 0644); err != nil {
+	absPath, _ := filepath.Abs("./internal/calculator/test.proto")
+	if err := ioutil.WriteFile(absPath, out, 0644); err != nil {
 		log.Fatalln("Failed to write address book:", err)
 	}
 }
 
 func read_csv() {
 	// open file
-	f, err := os.Open("/Users/sfortson/github-projects/fitness-tracker/internal/static/body_fat_table-men.csv")
+	absPath, _ := filepath.Abs("./internal/static/body_fat_table-men.csv")
+	f, err := os.Open(absPath)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"path/filepath"
 
 	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
 	"google.golang.org/protobuf/proto"
@@ -38,9 +39,10 @@ func (bf BodyFatCalculator) CalculateBMI() float64 {
 	return math.Trunc(bmi*100) / 100
 }
 
-func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) (Ideal) {
-	content, err := 
-		ioutil.ReadFile("/Users/sfortson/github-projects/fitness-tracker/internal/calculator/test.proto")
+func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) Ideal {
+	absPath, _ := filepath.Abs("./internal/calculator/test.proto")
+	content, err :=
+		ioutil.ReadFile(absPath)
 	if err != nil {
 		log.Fatalln("Failed to read proto:", err)
 	}
