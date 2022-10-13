@@ -23,6 +23,7 @@ func LoadConfig(path string) (config Config, err error) {
 
 	viper.SetConfigType("env")
 
+	viper.SetEnvPrefix("ft")
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
