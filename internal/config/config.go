@@ -21,9 +21,14 @@ func LoadConfig(path string) (config Config, err error) {
 
 	viper.SetConfigName("app")
 
-	viper.SetConfigType("env")
-
-	viper.SetEnvPrefix("ft")
+	// viper.SetEnvPrefix("ft")
+	// viper.SetConfigType("env")
+	viper.BindEnv("app_env")
+	viper.BindEnv("db_user")
+	viper.BindEnv("db_host")
+	viper.BindEnv("db_name")
+	viper.BindEnv("db_password")
+	viper.BindEnv("db_uri")
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
