@@ -27,6 +27,7 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.BindEnv("db_user")
 	viper.BindEnv("db_host")
 	viper.BindEnv("db_name")
+	viper.BindEnv("db_port")
 	viper.BindEnv("db_password")
 	viper.BindEnv("db_uri")
 	viper.AutomaticEnv()
