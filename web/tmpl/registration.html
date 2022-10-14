@@ -1,0 +1,100 @@
+{{define "body"}}
+<section class="section">
+  <p class="title is-1">Register New User</p>
+  <div class="columns">
+    <div class="column is-one-third">
+      <h2 class="title is-3">Enter Information</h2>
+      <form method="POST">
+        <div class="field">
+          <label class="label">Username</label>
+          <div class="control has-icons-left">
+              <input class="input" type="text" name="username" placeholder="Username">
+              <span class="icon is-small is-left">
+                <i class="fas fa-user"></i>
+              </span>
+          </div>
+        </div>
+        <div class="columns">
+          <div class="column">
+            <div class="control">
+              <label class="label">Sex</label>
+              <label class="radio">
+                <input type="radio" name="sex">
+                Male
+              </label>
+              <label class="radio">
+                <input type="radio" name="sex" checked>
+                Female
+              </label>
+            </div>
+          </div>
+          <div class="column">
+            <div class="field">
+              <label class="label" htmlFor="date">
+                Birthdate
+              </label>
+              <div class="control has-icons-right">
+                <input
+                  name="birthdate"
+                  id="birthdate"
+                  class="input"
+                  type="date"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">
+            Height
+          </label>
+          <div class="control has-icons-right">
+            <input
+              name="height"
+              id="height"
+              class="input"
+              type="text"
+            />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Email Address</label>
+          <div class="control has-icons-left">
+              <input class="input" type="email" name="email" placeholder="Email Address">
+              <span class="icon is-small is-left">
+                <i class="fas fa-envelope"></i>
+              </span>
+          </div>
+        </div>
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control has-icons-left">
+                <input class="input" type="password" name="password" id="password" placeholder="Password">
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock"></i>
+                </span>
+            </div>
+        </div>
+        <div class="field">
+          <label class="label">Confirm Password</label>
+          <div class="control has-icons-left">
+              <input 
+                class="input" 
+                type="password" 
+                name="confirmPassword" 
+                id="confirmPassword" 
+                placeholder="Password" 
+              >
+              <span class="icon is-small is-left">
+                <i class="fas fa-lock"></i>
+              </span>
+          </div>
+      </div>
+      <div class="control">
+        <button class="button is-link">Submit</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</section>
+{{end}}

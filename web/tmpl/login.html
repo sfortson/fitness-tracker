@@ -1,0 +1,44 @@
+{{define "body"}}
+<section class="section">
+  <p class="title is-1">Login</p>
+  <div class="columns">
+    <div class="column is-half">
+      <h2 class="title is-3">Enter Username and Password</h2>
+      <form method="POST">
+        <div class="field">
+          {{ with .Errors.usernamePassword }}
+              <div class="help is-danger">{{ . }}</div>
+          {{ end }}
+          <label class="label">Username</label>
+          <div class="control has-icons-left">
+              <input class="input" type="text" name="username" placeholder="Username">
+              <span class="icon is-small is-left">
+                <i class="fas fa-user"></i>
+              </span>
+              {{ with .Errors.username }}
+                    <div class="help is-danger">{{ . }}</div>
+              {{ end }}
+          </div>
+        </div>
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control has-icons-left">
+                <input class="input" type="password" name="password" id="password" placeholder="Password">
+                <span class="icon is-small is-left">
+                  <i class="fas fa-lock"></i>
+                </span>
+                {{ with .Errors.password }}
+                    <div class="help is-danger">{{ . }}</div>
+                {{ end }}
+            </div>
+        </div>
+      <div class="control">
+        <button class="button is-link">Submit</button>
+      </div>
+      </form>
+      <br />
+      <p>Sign up for an <a href="/register">Account</a></p>
+    </div>
+  </div>
+</section>
+{{end}}
