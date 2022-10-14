@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "packageManager": "yarn@3.2.4",
   "scripts": {
-    "start": "webpack serve --config ./webpack.config.js --mode development --port 3000"
+    "start": "webpack serve --config ./webpack.config.js --mode development --port 3000",
+    "build": "webpack --config ./webpack.config.js --mode production"
   },
   "dependencies": {
     "@emotion/react": "^11.10.4",
