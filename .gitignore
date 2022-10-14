@@ -4,3 +4,12 @@ server/server
 *.db
 .DS_Store
 config/*.env
+
+# web ignore
+web/.yarn/*
+!web/.yarn/cache
+!web/.yarn/patches
+!web/.yarn/plugins
+!web/.yarn/releases
+!web/.yarn/sdks
+!web/.yarn/versions
