@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/sfortson/fitness-tracker/internal/database"
-	templates "github.com/sfortson/fitness-tracker/web/app"
+	"github.com/sfortson/fitness-tracker/server/internal/database"
+	templates "github.com/sfortson/fitness-tracker/server/web/app"
 	"golang.org/x/crypto/bcrypt"
 )
 
