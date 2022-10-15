@@ -7,9 +7,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/internal/config"
+	"github.com/sfortson/fitness-tracker/server/internal/config"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -65,12 +64,14 @@ func (s Session) IsExpired() bool {
 func Open(config config.Config) error {
 	var err error
 
-	if config.AppEnv == "prod" || config.AppEnv == "production" {
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=America/New_York", config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
-		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	} else {
-		DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
-	}
+	// if config.AppEnv == "prod" || config.AppEnv == "production" {
+	// 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=America/New_York", config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
+	// 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// } else {
+	// 	DB, err = gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
+	// }
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s TimeZone=America/New_York", config.DBHost, config.DBUser, config.DBPassword, config.DBName, config.DBPort)
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		return err

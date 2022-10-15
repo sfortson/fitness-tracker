@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/internal/database"
-	"github.com/sfortson/fitness-tracker/internal/helpers"
-	templates "github.com/sfortson/fitness-tracker/web/app"
+	"github.com/sfortson/fitness-tracker/server/internal/database"
+	"github.com/sfortson/fitness-tracker/server/internal/helpers"
+	templates "github.com/sfortson/fitness-tracker/server/web/app"
 	"golang.org/x/crypto/bcrypt"
 )
 

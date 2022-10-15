@@ -1,12 +1,12 @@
 package calculator
 
 import (
-	"io/ioutil"
 	"log"
 	"math"
+	"os"
 	"path/filepath"
 
-	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
+	pb "github.com/sfortson/fitness-tracker/server/internal/calculator/proto"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -42,7 +42,7 @@ func (bf BodyFatCalculator) CalculateBMI() float64 {
 func (bf BodyFatCalculator) ReadIdeals(body_fat_percentage float32) Ideal {
 	absPath, _ := filepath.Abs("./internal/calculator/test.proto")
 	content, err :=
-		ioutil.ReadFile(absPath)
+		os.ReadFile(absPath)
 	if err != nil {
 		log.Fatalln("Failed to read proto:", err)
 	}
