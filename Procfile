@@ -1,1 +1,1 @@
-web: server/cmd
+web: server/cmd/main
