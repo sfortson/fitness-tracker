@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	pb "github.com/sfortson/fitness-tracker/server/internal/calculator/proto"
+	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -28,7 +28,7 @@ func write_proto(data [][]string) {
 
 		bfr := &pb.Bump_BodyFatRange{
 			Description: &(line[5]),
-			HealthRisk: &(line[6]),
+			HealthRisk:  &(line[6]),
 			Min:         &bf_min32,
 			Max:         &bf_max32,
 		}
