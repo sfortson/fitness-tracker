@@ -30,8 +30,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
 
-
-
   client:
     build:
       context: ./web
@@ -41,7 +39,7 @@ services:
     environment:
       - NODE_OPTIONS=--max_old_space_size=4096
     ports:
-      - 3000:80
+      - 3001:80
     depends_on: 
       - server
 

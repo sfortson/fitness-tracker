@@ -1,5 +1,16 @@
 import styled from '@emotion/styled';
-import { Button, Container, Grid, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  Container,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { useFormik } from 'formik';
 import { rem } from 'polished';
 import React from 'react';
@@ -14,20 +25,26 @@ const StyledTextField = styled(TextField)`
   padding-bottom: ${rem(8)};
 `;
 
+const StyledFormControl = styled(FormControl)`
+  padding-bottom: ${rem(8)};
+`;
+
 const validationSchema = yup.object({
   email: yup.string().email('Enter a valid email').required('Email is required'),
   password: yup.string().min(8, 'Password should be of minimum 8 characters length').required('Password is required'),
 });
 
-export function Login() {
+export function RegisterUser() {
   const formik = useFormik({
     initialValues: {
       email: 'foobar@example.com',
       password: 'foobar',
+      birthDate: '2022-10-05',
+      gender: 'female',
     },
     validationSchema,
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      console.log(values);
     },
   });
 
@@ -35,11 +52,11 @@ export function Login() {
     <Container>
       <Grid container>
         <Grid item xs={12}>
-          <StyledTitle variant="h2">Login</StyledTitle>
+          <StyledTitle variant="h2">Register New User</StyledTitle>
         </Grid>
         <Grid item xs={12}>
-          <StyledTitle variant="h3">Enter Username and Password</StyledTitle>
-          <Grid item xs={4}>
+          <StyledTitle variant="h3">Enter Information</StyledTitle>
+          <Grid item xs={5}>
             <div>
               <form onSubmit={formik.handleSubmit}>
                 <StyledTextField
@@ -52,6 +69,29 @@ export function Login() {
                   error={formik.touched.email && Boolean(formik.errors.email)}
                   helperText={formik.touched.email && formik.errors.email}
                 />
+                <StyledFormControl>
+                  <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="demo-radio-buttons-group-label"
+                    defaultValue="female"
+                    name="gender"
+                    onChange={(evt) => formik.handleChange(evt)}
+                  >
+                    <FormControlLabel value="female" control={<Radio />} label="Female" />
+                    <FormControlLabel value="male" control={<Radio />} label="Male" />
+                  </RadioGroup>
+                </StyledFormControl>
+                <StyledFormControl>
+                  <FormLabel id="birthdate-label">Birthdate</FormLabel>
+                  <TextField
+                    value={formik.values.birthDate}
+                    name="birthDate"
+                    id="birthDate"
+                    type="date"
+                    onChange={formik.handleChange}
+                  />
+                </StyledFormControl>
                 <StyledTextField
                   fullWidth
                   id="password"

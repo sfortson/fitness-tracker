@@ -10,9 +10,15 @@
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@mui/material": "^5.10.9",
+    "@mui/system": "^5.10.9",
+    "@mui/x-date-pickers": "^5.0.4",
+    "dayjs": "^1.11.5",
+    "formik": "^2.2.9",
+    "polished": "^4.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.2"
+    "react-router-dom": "^6.4.2",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",
