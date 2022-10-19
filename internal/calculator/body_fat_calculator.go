@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	pb "github.com/sfortson/fitness-tracker/server/internal/calculator/proto"
+	pb "github.com/sfortson/fitness-tracker/internal/calculator/proto"
 	"google.golang.org/protobuf/proto"
 )
 

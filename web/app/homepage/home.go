@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/internal/calculator"
-	"github.com/sfortson/fitness-tracker/server/internal/database"
-	"github.com/sfortson/fitness-tracker/server/internal/helpers"
-	"github.com/sfortson/fitness-tracker/server/internal/session"
-	templates "github.com/sfortson/fitness-tracker/server/web/app"
+	"github.com/sfortson/fitness-tracker/internal/calculator"
+	"github.com/sfortson/fitness-tracker/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/helpers"
+	"github.com/sfortson/fitness-tracker/internal/session"
+	templates "github.com/sfortson/fitness-tracker/web/app"
 )
 
 type homeForm struct {

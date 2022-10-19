@@ -6,11 +6,11 @@ server/server
 config/*.env
 
 # web ignore
-web/.yarn/*
-!web/.yarn/cache
-!web/.yarn/patches
-!web/.yarn/plugins
-!web/.yarn/releases
-!web/.yarn/sdks
-!web/.yarn/versions
-web/dist
+client/.yarn/*
+!client/.yarn/cache
+!client/.yarn/patches
+!client/.yarn/plugins
+!client/.yarn/releases
+!client/.yarn/sdks
+!client/.yarn/versions
+client/dist

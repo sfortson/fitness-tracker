@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/database"
 )
 
 func Logout(w http.ResponseWriter, r *http.Request) {

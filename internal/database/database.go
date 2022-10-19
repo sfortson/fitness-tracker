@@ -7,7 +7,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/sfortson/fitness-tracker/server/internal/config"
+	"github.com/sfortson/fitness-tracker/internal/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

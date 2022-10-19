@@ -9,14 +9,14 @@ import (
 
 	"github.com/felixge/httpsnoop"
 	"github.com/gorilla/mux"
-	"github.com/sfortson/fitness-tracker/server/internal/config"
-	"github.com/sfortson/fitness-tracker/server/internal/database"
-	"github.com/sfortson/fitness-tracker/server/internal/session"
-	templates "github.com/sfortson/fitness-tracker/server/web/app"
-	"github.com/sfortson/fitness-tracker/server/web/app/homepage"
-	"github.com/sfortson/fitness-tracker/server/web/app/login"
-	"github.com/sfortson/fitness-tracker/server/web/app/logout"
-	"github.com/sfortson/fitness-tracker/server/web/app/registration"
+	"github.com/sfortson/fitness-tracker/internal/config"
+	"github.com/sfortson/fitness-tracker/internal/database"
+	"github.com/sfortson/fitness-tracker/internal/session"
+	templates "github.com/sfortson/fitness-tracker/web/app"
+	"github.com/sfortson/fitness-tracker/web/app/homepage"
+	"github.com/sfortson/fitness-tracker/web/app/login"
+	"github.com/sfortson/fitness-tracker/web/app/logout"
+	"github.com/sfortson/fitness-tracker/web/app/registration"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {
